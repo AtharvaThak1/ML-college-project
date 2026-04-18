@@ -6,15 +6,37 @@ from dotenv import load_dotenv
 
 from utils import *
 
+# ==============================
+# LOAD ENV
+# ==============================
 load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
-API_KEY = os.getenv("API_KEY")  # from .env or Render
+# ==============================
+# LOAD MODEL SAFELY (IMPORTANT FIX)
+# ==============================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-model = joblib.load("main_model.pkl")
-vectorizer = joblib.load("vectorizer_model.pkl")
+model_path = os.path.join(BASE_DIR, "main_model.pkl")
+vectorizer_path = os.path.join(BASE_DIR, "vectorizer_model.pkl")
 
+model = joblib.load(model_path)
+vectorizer = joblib.load(vectorizer_path)
+
+# 🔥 DEBUG (REMOVE LATER)
+print("Model loaded:", type(model))
+print("Vectorizer loaded:", type(vectorizer))
+print("Is vectorizer fitted:", hasattr(vectorizer, "vocabulary_"))
+
+if hasattr(vectorizer, "vocabulary_"):
+    print("Feature count:", len(vectorizer.vocabulary_))
+else:
+    print("❌ ERROR: Vectorizer is NOT fitted")
+
+# ==============================
+# INIT APP
+# ==============================
 app = Flask(__name__)
-
 
 # ==============================
 # OCR FUNCTION
@@ -38,7 +60,7 @@ def extract_text_ocr_space(image_bytes, filename):
         print("Invalid OCR response")
         return ""
 
-   
+    print("FULL OCR RESPONSE:", result)
 
     if isinstance(result, str):
         print("OCR ERROR:", result)
@@ -54,7 +76,6 @@ def extract_text_ocr_space(image_bytes, filename):
 
     return ""
 
-
 # ==============================
 # MAIN API
 # ==============================
@@ -67,7 +88,7 @@ def analyze():
         file = request.files["image"]
         filename = file.filename
 
-        # validate type
+        # validate file type
         allowed = ["jpg", "jpeg", "png", "webp"]
         ext = filename.split(".")[-1].lower()
 
@@ -76,20 +97,32 @@ def analyze():
 
         image_bytes = file.read()
 
+        # ==============================
         # OCR
+        # ==============================
         extracted_text = extract_text_ocr_space(image_bytes, filename)
+
+        print("EXTRACTED TEXT:", extracted_text)
 
         if not extracted_text.strip():
             return jsonify({"error": "No text detected"}), 400
 
-        # ML
+        # ==============================
+        # ML PREDICTION
+        # ==============================
         clean = clean_text(extracted_text)
-        vec = vectorizer.transform([clean])
+
+        try:
+            vec = vectorizer.transform([clean])
+        except Exception as e:
+            return jsonify({"error": "Vectorizer error: " + str(e)}), 500
 
         grade = model.predict(vec)[0]
         confidence = float(model.predict_proba(vec).max())
 
-        # Post processing
+        # ==============================
+        # POST PROCESSING
+        # ==============================
         risks = detect_risk(extracted_text)
         allergens = detect_allergens(extracted_text)
 
@@ -130,7 +163,6 @@ def analyze():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # ==============================
 # RUN SERVER
