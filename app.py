@@ -26,7 +26,7 @@ def extract_text_ocr_space(image_bytes):
         url,
         files={"file": image_bytes},
         data={
-            "apikey": os.getenv("API_KEY"),   # free key
+            "apikey": "helloworld",
             "language": "eng"
         }
     )
@@ -34,7 +34,15 @@ def extract_text_ocr_space(image_bytes):
     result = response.json()
 
     try:
-        return result["ParsedResults"][0]["ParsedText"]
+        if result["IsErroredOnProcessing"]:
+            return ""
+
+        parsed = result.get("ParsedResults")
+        if parsed and len(parsed) > 0:
+            return parsed[0].get("ParsedText", "")
+        else:
+            return ""
+
     except:
         return ""
 
