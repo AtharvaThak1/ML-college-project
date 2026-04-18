@@ -1,10 +1,9 @@
-import os
-
 from flask import Flask, request, jsonify
 import joblib
-import pytesseract
-from PIL import Image
-import io
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from utils import *
 
@@ -16,19 +15,28 @@ vectorizer = joblib.load("vectorizer.pkl")
 
 app = Flask(__name__)
 
-# ==============================
-# OPTIONAL: SET TESSERACT PATH (WINDOWS)
-# ==============================
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
 
 # ==============================
-# OCR FUNCTION
+# OCR USING OCR.SPACE
 # ==============================
-def extract_text(image_bytes):
-    image = Image.open(io.BytesIO(image_bytes))
-    text = pytesseract.image_to_string(image)
-    return text
+def extract_text_ocr_space(image_bytes):
+    url = "https://api.ocr.space/parse/image"
+
+    response = requests.post(
+        url,
+        files={"file": image_bytes},
+        data={
+            "apikey": os.getenv("API_KEY"),   # free key
+            "language": "eng"
+        }
+    )
+
+    result = response.json()
+
+    try:
+        return result["ParsedResults"][0]["ParsedText"]
+    except:
+        return ""
 
 
 # ==============================
@@ -43,11 +51,10 @@ def analyze():
         file = request.files["image"]
         health_conditions = request.form.get("health_conditions", "")
 
-        # Read image
         image_bytes = file.read()
 
         # OCR
-        extracted_text = extract_text(image_bytes)
+        extracted_text = extract_text_ocr_space(image_bytes)
 
         if not extracted_text.strip():
             return jsonify({"error": "No text detected"}), 400
@@ -76,7 +83,6 @@ def analyze():
 
         recommendations = generate_recommendations(risks, allergens)
 
-        # Response
         return jsonify({
             "analysis": {
                 "grade": grade,
@@ -108,5 +114,7 @@ def analyze():
 # ==============================
 # RUN SERVER
 # ==============================
+import os
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
