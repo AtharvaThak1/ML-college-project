@@ -1,15 +1,15 @@
 from flask import Flask, request, jsonify
 import joblib
 import requests
+import os
 from dotenv import load_dotenv
-
-load_dotenv()
 
 from utils import *
 
-# ==============================
-# LOAD MODEL
-# ==============================
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")  # from .env or Render
+
 model = joblib.load("model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
 
@@ -17,34 +17,42 @@ app = Flask(__name__)
 
 
 # ==============================
-# OCR USING OCR.SPACE
+# OCR FUNCTION
 # ==============================
-def extract_text_ocr_space(image_bytes):
+def extract_text_ocr_space(image_bytes, filename):
     url = "https://api.ocr.space/parse/image"
 
     response = requests.post(
         url,
-        files={"file": image_bytes},
+        files={"file": (filename, image_bytes)},  # dynamic filename
         data={
-            "apikey": os.getenv("API_KEY"),
-            "language": "eng"
+            "apikey": API_KEY,
+            "language": "eng",
+            "OCREngine": 2
         }
     )
 
-    result = response.json()
-
     try:
-        if result["IsErroredOnProcessing"]:
-            return ""
-
-        parsed = result.get("ParsedResults")
-        if parsed and len(parsed) > 0:
-            return parsed[0].get("ParsedText", "")
-        else:
-            return ""
-
+        result = response.json()
     except:
+        print("Invalid OCR response")
         return ""
+
+   
+
+    if isinstance(result, str):
+        print("OCR ERROR:", result)
+        return ""
+
+    if result.get("IsErroredOnProcessing"):
+        print("OCR ERROR:", result.get("ErrorMessage"))
+        return ""
+
+    parsed = result.get("ParsedResults")
+    if parsed:
+        return parsed[0].get("ParsedText", "")
+
+    return ""
 
 
 # ==============================
@@ -57,23 +65,27 @@ def analyze():
             return jsonify({"error": "No image uploaded"}), 400
 
         file = request.files["image"]
-        health_conditions = request.form.get("health_conditions", "")
+        filename = file.filename
+
+        # validate type
+        allowed = ["jpg", "jpeg", "png", "webp"]
+        ext = filename.split(".")[-1].lower()
+
+        if ext not in allowed:
+            return jsonify({"error": "Unsupported file type"}), 400
 
         image_bytes = file.read()
 
         # OCR
-        extracted_text = extract_text_ocr_space(image_bytes)
+        extracted_text = extract_text_ocr_space(image_bytes, filename)
 
         if not extracted_text.strip():
             return jsonify({"error": "No text detected"}), 400
 
-        # Clean
+        # ML
         clean = clean_text(extracted_text)
-
-        # Vectorize
         vec = vectorizer.transform([clean])
 
-        # Predict
         grade = model.predict(vec)[0]
         confidence = float(model.predict_proba(vec).max())
 
@@ -83,6 +95,7 @@ def analyze():
 
         usage, impact = usage_recommendation(grade)
 
+        health_conditions = request.form.get("health_conditions", "")
         conditions_list = [c.strip().lower() for c in health_conditions.split(",") if c]
 
         personalized = personalized_advice(
@@ -122,7 +135,5 @@ def analyze():
 # ==============================
 # RUN SERVER
 # ==============================
-import os
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
