@@ -1,136 +1,174 @@
-<h1 align="center">🥗 Food Ingredient Health Checker</h1>
+# 🍎 AI Food Ingredient Analyzer
 
 <p align="center">
-  <b>Machine Learning based API to analyze food ingredients and predict health grade</b>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Flask-API-green?style=for-the-badge">
-  <img src="https://img.shields.io/badge/MachineLearning-ScikitLearn-orange?style=for-the-badge">
+  <img src="https://img.shields.io/badge/ML-Scikit--Learn-blue?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/API-Flask-green?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/OCR-OCR.space-orange?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Status-Live-success?style=for-the-badge"/>
 </p>
 
 <p align="center">
-  🚀 <b>Live API:</b> 
-  <a href="https://ml-college-project.onrender.com" target="_blank">
-    https://ml-college-project.onrender.com
-  </a>
+  🚀 <b>Upload food ingredient image → Get health insights instantly</b>
 </p>
 
 ---
 
-<h2>✨ Features</h2>
+## 🌐 Live Demo
 
-<ul>
-  <li>🧠 Predicts food <b>health grade (A–E)</b></li>
-  <li>📊 Shows <b>confidence score</b></li>
-  <li>⚠️ Detects <b>risky ingredients</b></li>
-  <li>🧪 Identifies <b>allergens</b></li>
-  <li>⚡ Fast and simple API</li>
-</ul>
+👉 **Try here:**
+🔗 https://ml-college-project-1.onrender.com
 
 ---
 
-<h2>⚙️ How It Works</h2>
+## ✨ Features
 
-<ol>
-  <li>Ingredient text is cleaned</li>
-  <li>Converted using TF-IDF</li>
-  <li>Model predicts grade</li>
-  <li>Risk & allergen detection applied</li>
-</ol>
-
----
-
-<h2>📦 Tech Stack</h2>
-
-<p>
-  Python • Flask • Scikit-learn • Pandas • NumPy
-</p>
+* 📸 Upload food ingredient image
+* 🔍 OCR extracts text automatically
+* 🧠 ML model predicts **NutriScore (A–E)**
+* ⚠️ Detects **risk ingredients** (sugar, sodium, etc.)
+* 🧬 Identifies **allergens**
+* ❤️ Personalized advice (diabetes, lactose intolerance, etc.)
+* 📊 Usage recommendation (daily / avoid / limit)
 
 ---
 
-<h2>📂 Project Structure</h2>
+## 🧠 How It Works
 
-<pre>
-project/
-│── app.py
-│── model.pkl
-│── vectorizer.pkl
-│── requirements.txt
-│── Procfile
-</pre>
+```mermaid
+flowchart LR
+A[📸 Upload Image] --> B[🔍 OCR Extraction]
+B --> C[🧹 Text Cleaning]
+C --> D[📊 TF-IDF Vectorization]
+D --> E[🤖 ML Model Prediction]
+E --> F[📦 Output JSON]
+```
 
 ---
 
-<h2>🧪 API Usage</h2>
+## 🛠️ Tech Stack
 
-<b>Endpoint:</b>
-<pre>POST /analyze</pre>
+* ⚙️ Flask (Backend API)
+* 🧠 Scikit-learn (ML Model)
+* 📊 TF-IDF Vectorizer
+* 🔍 OCR.space API (Image → Text)
+* 🐍 Python
 
-<b>Request:</b>
+---
 
-<pre>
+## 📦 API Usage
+
+### 🔗 Endpoint
+
+```
+POST /analyze
+```
+
+---
+
+### 📤 Request (Postman / Frontend)
+
+* Body → **form-data**
+
+| Key               | Type            |
+| ----------------- | --------------- |
+| image             | File            |
+| health_conditions | Text (optional) |
+
+---
+
+### 📥 Sample Response
+
+```json
 {
-  "text": "milk sugar oil wheat"
+  "analysis": {
+    "grade": "C",
+    "confidence": 0.82,
+    "health_impact": "Moderate impact"
+  },
+  "risks": {
+    "risk_words": ["sugar", "sodium"],
+    "severity": "medium"
+  },
+  "allergens": {
+    "detected": []
+  },
+  "usage": {
+    "daily_recommendation": "Limit (2-3/week)"
+  },
+  "personalized": {
+    "conditions": ["diabetes"],
+    "advice": ["Avoid high sugar due to diabetes"]
+  },
+  "recommendations": [
+    "Choose low-sugar alternatives"
+  ]
 }
-</pre>
-
-<b>Response:</b>
-
-<pre>
-{
-  "grade": "C",
-  "confidence": 0.82,
-  "risk_words": ["sugar", "oil"],
-  "allergens": ["milk", "gluten"]
-}
-</pre>
+```
 
 ---
 
-<h2>🌐 Live Testing</h2>
+## 🚀 Installation (Local Setup)
 
-<p>
-  You can test the deployed API using tools like Postman or Curl:
-</p>
-
-<pre>
-POST https://ml-college-project.onrender.com/analyze
-</pre>
-
----
-
-<h2>🚀 Run Locally</h2>
-
-<pre>
-git clone https://github.com/AtharvaThak1/ML-college-project.git
-cd ML-college-project
+```bash
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
 pip install -r requirements.txt
+```
+
+---
+
+### ▶️ Run Server
+
+```bash
 python app.py
-</pre>
+```
 
 ---
 
-<h2>📈 Model Details</h2>
+## 🔐 Environment Variables
 
-<ul>
-  <li>Algorithm: Logistic Regression</li>
-  <li>Vectorizer: TF-IDF</li>
-  <li>Input: Ingredients</li>
-  <li>Output: Grade (A–E)</li>
-</ul>
+Create `.env` file:
 
----
-
-<h2>👨‍💻 Author</h2>
-
-<p>Atharva Thak</p>
+```
+OCR_API_KEY=your_api_key_here
+```
 
 ---
 
-<h2 align="center">⭐ If you like this project, give it a star!</h2>
+## 📸 Example Use Case
+
+* Scan biscuit packet 🍪
+* Detect sugar, oil, preservatives ⚠️
+* Get health recommendation instantly
+
+---
+
+## 📊 Future Improvements
+
+* 🌍 Multi-language OCR
+* 📱 Mobile app (React Native)
+* 🤖 Deep learning model upgrade
+* 🧾 Nutrition + ingredient hybrid analysis
+
+---
+
+## 👨‍💻 Author
+
+**Atharva Thak**
+🎓 BTech Student | AI & Web Developer
+
+---
+
+## ⭐ Support
+
+If you like this project:
+
+👉 ⭐ Star the repo
+👉 🍴 Fork it
+👉 💡 Contribute
+
+---
 
 <p align="center">
-  <img src="https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.gif" width="200">
+  🚀 Built with passion for AI + Health Tech
 </p>
