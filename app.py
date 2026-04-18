@@ -10,8 +10,8 @@ load_dotenv()
 
 API_KEY = os.getenv("API_KEY")  # from .env or Render
 
-model = joblib.load("model.pkl")
-vectorizer = joblib.load("vectorizer.pkl")
+model = joblib.load("main_model.pkl")
+vectorizer = joblib.load("vectorizer_model.pkl")
 
 app = Flask(__name__)
 
