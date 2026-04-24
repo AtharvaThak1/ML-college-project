@@ -1,174 +1,128 @@
+
 # 🍎 AI Food Ingredient Analyzer
 
 <p align="center">
   <img src="https://img.shields.io/badge/ML-Scikit--Learn-blue?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/API-Flask-green?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/OCR-OCR.space-orange?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Frontend-React-blueviolet?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/Status-Live-success?style=for-the-badge"/>
 </p>
 
 <p align="center">
-  🚀 <b>Upload food ingredient image → Get health insights instantly</b>
+  🚀 <b>Snap ingredients → Decode health → Make smarter food choices</b>
 </p>
 
----
 
-## 🌐 Live Demo
-
-👉 **Try here:**
-🔗 https://ml-college-project-1.onrender.com
-
----
 
 ## ✨ Features
 
-* 📸 Upload food ingredient image
-* 🔍 OCR extracts text automatically
-* 🧠 ML model predicts **NutriScore (A–E)**
-* ⚠️ Detects **risk ingredients** (sugar, sodium, etc.)
-* 🧬 Identifies **allergens**
-* ❤️ Personalized advice (diabetes, lactose intolerance, etc.)
-* 📊 Usage recommendation (daily / avoid / limit)
+- 📸 Upload food ingredient images instantly  
+- 🔍 OCR extracts ingredient text automatically  
+- 🧠 ML model predicts **NutriScore (A–E)**  
+- ⚠️ Detects **risk ingredients** (sugar, sodium, preservatives)  
+- 🧬 Identifies **allergens**  
+- ❤️ Personalized advice based on health conditions  
+- 📊 Smart usage recommendations (daily / limit / avoid)  
 
----
 
-## 🧠 How It Works
 
-```mermaid
-flowchart LR
-A[📸 Upload Image] --> B[🔍 OCR Extraction]
-B --> C[🧹 Text Cleaning]
-C --> D[📊 TF-IDF Vectorization]
-D --> E[🤖 ML Model Prediction]
-E --> F[📦 Output JSON]
+
+## 🏗️ Project Architecture
+
+```bash
+ML-college-mini-project-02/
+│
+├── frontend/     # React-based UI
+├── backend/      # Flask API + ML Model
+└── README.md     # Documentation
 ```
 
----
 
 ## 🛠️ Tech Stack
 
-* ⚙️ Flask (Backend API)
-* 🧠 Scikit-learn (ML Model)
-* 📊 TF-IDF Vectorizer
-* 🔍 OCR.space API (Image → Text)
-* 🐍 Python
+### 🎨 Frontend
 
----
+* React.js
+* Tailwind CSS, TypeScript
+* Axios (API calls)
 
-## 📦 API Usage
+### ⚙️ Backend
 
-### 🔗 Endpoint
+* Flask (REST API)
+* Python
 
-```
-POST /analyze
-```
+### 🧠 Machine Learning
 
----
+* Scikit-learn
+* TF-IDF Vectorizer
+* Text preprocessing pipeline
 
-### 📤 Request (Postman / Frontend)
+### 🔍 OCR
 
-* Body → **form-data**
+* OCR.space API (Image → Text extraction)
 
-| Key               | Type            |
-| ----------------- | --------------- |
-| image             | File            |
-| health_conditions | Text (optional) |
 
----
 
-### 📥 Sample Response
+## 🚀 Local Setup
 
-```json
-{
-  "analysis": {
-    "grade": "C",
-    "confidence": 0.82,
-    "health_impact": "Moderate impact"
-  },
-  "risks": {
-    "risk_words": ["sugar", "sodium"],
-    "severity": "medium"
-  },
-  "allergens": {
-    "detected": []
-  },
-  "usage": {
-    "daily_recommendation": "Limit (2-3/week)"
-  },
-  "personalized": {
-    "conditions": ["diabetes"],
-    "advice": ["Avoid high sugar due to diabetes"]
-  },
-  "recommendations": [
-    "Choose low-sugar alternatives"
-  ]
-}
-```
-
----
-
-## 🚀 Installation (Local Setup)
+### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone https://github.com/AbhishekGanvir/ML-college-mini-project-02.git
+cd ML-college-mini-project-02
+```
+
+
+
+### 2️⃣ Backend Setup
+
+```bash
+cd backend
 pip install -r requirements.txt
-```
-
----
-
-### ▶️ Run Server
-
-```bash
 python app.py
 ```
 
----
+📍 Runs on: `http://localhost:5000`
+
+
+
+### 3️⃣ Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+📍 Runs on: `http://localhost:3000`
+
+
 
 ## 🔐 Environment Variables
 
-Create `.env` file:
+Create a `.env` file inside **backend/**:
 
 ```
 OCR_API_KEY=your_api_key_here
 ```
 
----
+
 
 ## 📸 Example Use Case
 
-* Scan biscuit packet 🍪
-* Detect sugar, oil, preservatives ⚠️
-* Get health recommendation instantly
+* Scan a biscuit or snack packet 🍪
+* Detect harmful ingredients like sugar, oils, additives ⚠️
+* Receive instant health insights and recommendations ❤️
 
----
 
-## 📊 Future Improvements
 
-* 🌍 Multi-language OCR
-* 📱 Mobile app (React Native)
-* 🤖 Deep learning model upgrade
-* 🧾 Nutrition + ingredient hybrid analysis
-
----
-
-## 👨‍💻 Author
-
-**Atharva Thak**
-🎓 BTech Student | AI & Web Developer
-
----
 
 ## ⭐ Support
 
-If you like this project:
+If this project helped or impressed you:
 
-👉 ⭐ Star the repo
-👉 🍴 Fork it
-👉 💡 Contribute
+* ⭐ Star the repository
+* 🍴 Fork it
+* 💡 Contribute or suggest improvements
 
----
-
-<p align="center">
-  🚀 Built with passion for AI + Health Tech
-</p>
