@@ -1,4 +1,6 @@
 import re
+import os
+import requests
 
 # ==============================
 # CLEAN TEXT
@@ -6,39 +8,44 @@ import re
 def clean_text(text):
     text = str(text).lower()
     text = re.sub(r'[^a-zA-Z ]', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip()
+    return re.sub(r'\s+', ' ', text).strip()
 
+# ==============================
+# VALIDATION
+# ==============================
+def is_food_related(text):
+    keywords = [
+        "ingredient", "contains", "sugar", "salt", "oil",
+        "wheat", "milk", "flour", "fat", "protein",
+        "nutrition", "carbohydrate", "sodium"
+    ]
+    text = text.lower()
+    matches = sum(1 for k in keywords if k in text)
+    return matches >= 2
 
 # ==============================
 # RISK DETECTION
 # ==============================
 danger_words = [
-    "sugar", "added sugar", "high fructose corn syrup",
-    "palm oil", "refined oil", "hydrogenated",
-    "preservatives", "artificial", "flavour enhancer",
-    "sodium", "salt", "msg"
+    "sugar", "palm oil", "refined oil",
+    "sodium", "salt", "msg", "preservatives"
 ]
 
 def detect_risk(text):
     text = text.lower()
     return [w for w in danger_words if w in text]
 
-
 # ==============================
 # ALLERGEN DETECTION
 # ==============================
 def detect_allergens(text):
     allergens = {
-        "milk": ["milk", "lactose", "butter", "cheese"],
-        "nuts": ["nuts", "almond", "cashew", "peanut", "walnut"],
-        "gluten": ["wheat", "gluten", "barley"],
+        "milk": ["milk", "lactose"],
+        "gluten": ["wheat", "gluten"],
+        "nuts": ["almond", "cashew", "peanut"],
         "soy": ["soy"],
-        "egg": ["egg"],
-        "fish": ["fish"],
-        "shellfish": ["shrimp", "crab", "lobster"]
+        "egg": ["egg"]
     }
-
     found = []
     text = text.lower()
 
@@ -48,43 +55,52 @@ def detect_allergens(text):
 
     return found
 
-
 # ==============================
 # USAGE LOGIC
 # ==============================
 def usage_recommendation(grade):
-    mapping = {
-        "A": ("Safe daily", "Low impact"),
-        "B": ("Moderate daily", "Mild impact"),
-        "C": ("Limit (2-3/week)", "Moderate impact"),
-        "D": ("Rare consumption", "High impact"),
-        "E": ("Avoid", "Very high impact")
+    return {
+        "A": {"level": "Safe", "frequency": "Daily", "quantity": "1-2 servings", "impact": "Low"},
+        "B": {"level": "Moderate", "frequency": "Daily (limited)", "quantity": "1 serving", "impact": "Mild"},
+        "C": {"level": "Limit", "frequency": "2-3/week", "quantity": "Small portions", "impact": "Moderate"},
+        "D": {"level": "Rare", "frequency": "1-2/week", "quantity": "Very small", "impact": "High"},
+        "E": {"level": "Avoid", "frequency": "Avoid", "quantity": "None", "impact": "Very high"}
+    }.get(grade, {})
+
+# ==============================
+# RISK DETAILS
+# ==============================
+def risk_details(risks):
+    info = {
+        "sugar": "High sugar may cause diabetes and weight gain.",
+        "sodium": "Excess salt can increase blood pressure.",
+        "palm oil": "High saturated fat affects heart health.",
+        "refined oil": "Highly processed oil increases cholesterol.",
+        "msg": "May cause headaches in sensitive individuals.",
+        "preservatives": "Long-term intake may affect metabolism."
     }
-    return mapping.get(grade, ("Unknown", "Unknown"))
 
+    return [
+        {
+            "name": r,
+            "description": info.get(r, "May affect health"),
+            "long_term": "Frequent use may be harmful"
+        }
+        for r in risks
+    ]
 
 # ==============================
-# PERSONALIZATION
+# ALLERGEN DETAILS
 # ==============================
-def personalized_advice(text, allergens, conditions):
-    advice = []
-
-    if not conditions:
-        return advice
-
-    text = text.lower()
-
-    if "diabetes" in conditions and "sugar" in text:
-        advice.append("Avoid high sugar due to diabetes")
-
-    if "lactose_intolerance" in conditions and "milk" in allergens:
-        advice.append("Contains lactose, avoid this product")
-
-    if "heart" in conditions and "oil" in text:
-        advice.append("High oil content may affect heart health")
-
-    return advice
-
+def allergen_details(allergens):
+    return [
+        {
+            "name": a,
+            "symptoms": "Digestive issues / allergic reaction",
+            "prevalence": "Common in some individuals"
+        }
+        for a in allergens
+    ]
 
 # ==============================
 # RECOMMENDATIONS
@@ -92,70 +108,65 @@ def personalized_advice(text, allergens, conditions):
 def generate_recommendations(risks, allergens, grade, conditions):
     recs = {
         "overall": "",
-        "dietary": [],
-        "lifestyle": [],
+        "do": [],
+        "avoid": [],
         "alternatives": []
     }
 
-    # =========================
-    # OVERALL SUMMARY
-    # =========================
-    if grade == "A":
-        recs["overall"] = "This is a healthy food option suitable for regular consumption."
-    elif grade == "B":
-        recs["overall"] = "Generally safe, but consume in moderation."
+    if grade in ["A", "B"]:
+        recs["overall"] = "Good food choice with balanced intake."
     elif grade == "C":
-        recs["overall"] = "Moderate health impact. Avoid frequent consumption."
-    elif grade == "D":
-        recs["overall"] = "Not recommended regularly. Limit intake."
+        recs["overall"] = "Consume in moderation."
     else:
-        recs["overall"] = "Highly unhealthy. Avoid consumption."
+        recs["overall"] = "Limit or avoid consumption."
 
-    # =========================
-    # DIETARY SUGGESTIONS
-    # =========================
     if "sugar" in risks:
-        recs["dietary"].append("Reduce sugar intake to maintain healthy blood levels")
-        recs["alternatives"].append("Use jaggery or natural sweeteners")
+        recs["avoid"].append("High sugar intake")
+        recs["alternatives"].append("Use natural sweeteners")
 
-    if "sodium" in risks or "salt" in risks:
-        recs["dietary"].append("Limit sodium intake to control blood pressure")
-        recs["alternatives"].append("Use low-sodium alternatives")
+    if "sodium" in risks:
+        recs["avoid"].append("Excess salt")
+        recs["alternatives"].append("Low sodium options")
 
-    if "palm oil" in risks or "refined oil" in risks:
-        recs["dietary"].append("Avoid processed oils for better heart health")
-        recs["alternatives"].append("Switch to olive oil or cold-pressed oils")
-
-    # =========================
-    # ALLERGEN BASED
-    # =========================
     if "milk" in allergens:
-        recs["dietary"].append("Avoid dairy if lactose intolerant")
-        recs["alternatives"].append("Try almond or soy milk")
+        recs["avoid"].append("Dairy products")
+        recs["alternatives"].append("Plant-based milk")
 
-    if "gluten" in allergens:
-        recs["dietary"].append("Avoid gluten if sensitive")
-        recs["alternatives"].append("Try gluten-free grains like rice or oats")
+    if "diabetes" in conditions:
+        recs["do"].append("Monitor sugar intake")
 
-    if "nuts" in allergens:
-        recs["dietary"].append("Avoid nuts if allergic")
-    
-    # =========================
-    # CONDITION BASED
-    # =========================
-    if "diabetes" in conditions and "sugar" in risks:
-        recs["lifestyle"].append("Monitor sugar intake strictly due to diabetes")
-
-    if "heart" in conditions and "oil" in risks:
-        recs["lifestyle"].append("Limit oily foods to maintain heart health")
-
-    if "lactose_intolerance" in conditions and "milk" in allergens:
-        recs["lifestyle"].append("Avoid lactose-based products completely")
-
-    # =========================
-    # DEFAULT CASE
-    # =========================
-    if not recs["dietary"]:
-        recs["dietary"].append("Food is relatively safe if consumed in moderation")
+    if not recs["do"]:
+        recs["do"].append("Maintain balanced diet")
 
     return recs
+
+# ==============================
+# GEMINI ENHANCEMENT
+# ==============================
+def gemini_enhance(grade, risks, allergens, usage):
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        return ""
+
+    prompt = f"""
+    Explain food health simply:
+
+    Grade: {grade}
+    Risks: {risks}
+    Allergens: {allergens}
+    Usage: {usage}
+
+    Give short explanation and advice.
+    """
+
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={api_key}"
+
+    try:
+        res = requests.post(url, json={
+            "contents": [{"parts": [{"text": prompt}]}]
+        })
+        data = res.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+    except:
+        return ""
