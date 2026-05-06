@@ -11,23 +11,37 @@ interface AnalysisResult {
   analysis: {
     grade: string;
     confidence: number;
-    health_impact: string;
-  };
-  risks: {
-    risk_words: string[];
-    severity: string;
-  };
-  allergens: {
-    detected: string[];
+    impact: string;
   };
   usage: {
-    daily_recommendation: string;
+    frequency: string;
+    impact: string;
+    level: string;
+    quantity: string;
   };
-  personalized: {
-    conditions: string[];
-    advice: string[];
+  risks: {
+    list: string[];
+    details: Array<{
+      name: string;
+      description: string;
+      long_term: string;
+    }>;
   };
-  recommendations: string[];
+  allergens: {
+    list: string[];
+    details: Array<{
+      name: string;
+      symptoms: string;
+      info: string;
+    }>;
+  };
+  recommendations: {
+    overall: string;
+    do: string[];
+    avoid: string[];
+    alternatives: string[];
+  };
+  ai_explanation: string;
   extracted_text?: string;
 }
 
@@ -56,11 +70,15 @@ const MOCK_RESULT: AnalysisResult = {
 };
 
 export default function App() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [showHero, setShowHero] = useState(true);
-  const [useMockData, setUseMockData] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+    document.body.style.background = "#0a0e1a";
+  }, []);
 
   useEffect(() => {
     if (isDark) {
@@ -112,7 +130,8 @@ export default function App() {
         throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json();
+      const data: AnalysisResult = await response.json();
+
       setResult(data);
       toast.success("Analysis complete!");
     } catch (error) {
@@ -145,7 +164,8 @@ export default function App() {
   return (
     <ThemeProvider theme={isDark ? "dark" : "light"}>
       <Toaster />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
+      <div className="min-h-screen bg-[#0a0e1a] text-slate-100 transition-colors duration-300">
+        <ParticleBackground />
         <Navbar isDark={isDark} toggleTheme={toggleTheme} />
 
         <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">

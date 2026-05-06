@@ -3,9 +3,11 @@ app3.py
 test.py
 utils1.py
 app3.py
-
+node_modules
+.gitignore
 # Environment variables
 .env
+#c
 
 # Python cache
 __pycache__/
