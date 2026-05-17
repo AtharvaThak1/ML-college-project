@@ -69,15 +69,19 @@ export default function Upload({ onAnalyze, isLoading }: UploadProps) {
         onDragOver={handleDrag}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative cursor-pointer rounded-3xl transition-all duration-300 overflow-hidden group glass-card ${
+        className={`relative cursor-pointer rounded-3xl transition-all duration-300 glass-noise overflow-hidden group ${
           dragActive
             ? 'border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.5)]'
-            : 'border-2 border-dashed hover:border-emerald-500/50'
+            : 'border-2 border-dashed border-white/20 hover:border-emerald-500/50'
         }`}
+        style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(24px)',
+        }}
       >
         {/* Animated gradient border glow */}
-        <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 pointer-events-none ${dragActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-30'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-500 opacity-20 blur-xl" />
+        <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${dragActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 opacity-30 blur-xl animate-rotate-slow" />
         </div>
 
         <input
@@ -109,18 +113,18 @@ export default function Upload({ onAnalyze, isLoading }: UploadProps) {
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 className="relative inline-block mb-6"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl blur-2xl opacity-30" />
-                <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-green-600/20 border border-emerald-500/30 flex items-center justify-center backdrop-blur-xl">
-                  <ImageIcon className="w-12 h-12 text-emerald-500" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-3xl blur-2xl opacity-60 animate-glow-pulse" />
+                <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center backdrop-blur-xl">
+                  <ImageIcon className="w-12 h-12 text-emerald-400" />
                 </div>
               </motion.div>
-              <h3 className="text-2xl font-semibold mb-3 tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="text-2xl font-semibold text-white mb-3 tracking-tight">
                 Drop your food image here
               </h3>
-              <p className="tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-slate-400 tracking-wide">
                 or click to browse
               </p>
-              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-emerald-500">
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-emerald-400">
                 <Sparkles className="w-4 h-4" />
                 <span>Supports JPG, PNG, WEBP</span>
               </div>
@@ -133,18 +137,21 @@ export default function Upload({ onAnalyze, isLoading }: UploadProps) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="rounded-3xl glass-card p-8"
+        className="rounded-3xl glass-card glass-noise p-8 border border-white/10"
+        style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(24px)',
+        }}
       >
-        <label className="block mb-3 font-medium tracking-wide" style={{ color: 'var(--text-primary)' }}>
-          Health Conditions <span className="font-normal" style={{ color: 'var(--text-secondary)' }}>(Optional)</span>
+        <label className="block mb-3 text-white font-medium tracking-wide">
+          Health Conditions <span className="text-slate-400 font-normal">(Optional)</span>
         </label>
         <input
           type="text"
           value={conditions}
           onChange={(e) => setConditions(e.target.value)}
           placeholder="e.g., diabetes, lactose intolerance"
-          className="w-full px-6 py-4 rounded-2xl glass-card focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
-          style={{ color: 'var(--text-primary)' }}
+          className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all backdrop-blur-xl"
         />
       </motion.div>
 
@@ -156,11 +163,11 @@ export default function Upload({ onAnalyze, isLoading }: UploadProps) {
         whileTap={{ scale: 0.98 }}
         onClick={handleSubmit}
         disabled={!selectedFile || isLoading}
-        className="relative w-full py-5 px-8 rounded-2xl font-semibold text-white text-lg tracking-wide overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg"
+        className="relative w-full py-5 px-8 rounded-2xl font-semibold text-white text-lg tracking-wide overflow-hidden neumorphic-btn disabled:opacity-50 disabled:cursor-not-allowed group"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-green-600" />
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-cyan-500" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         <div className="relative flex items-center justify-center gap-3">
           {isLoading ? (

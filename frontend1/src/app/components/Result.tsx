@@ -524,6 +524,29 @@ export default function Result({ result, onReset }: ResultProps) {
         </div>
       </motion.div>
 
+      {/* Detailed Insight */}
+      <motion.div
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="rounded-3xl glass-card glass-noise border border-indigo-500/20 p-8 relative overflow-hidden group"
+        style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(32px)' }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-50" />
+
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-indigo-500/20 border border-indigo-500/30">
+              <Info className="w-6 h-6 text-indigo-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white tracking-tight">Detailed Insight</h3>
+          </div>
+          <p className="text-slate-300 leading-relaxed text-lg">
+            {result.ai_explanation}
+          </p>
+        </div>
+      </motion.div>
+
       {/* Extracted Text (Collapsible) */}
       {result.extracted_text && (
         <motion.div

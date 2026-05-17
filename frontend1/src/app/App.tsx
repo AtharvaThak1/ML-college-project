@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+
 import Navbar from "./components/Navbar";
 import Upload from "./components/Upload";
 import Result from "./components/Result";
 import ParticleBackground from "./components/ParticleBackground";
+
 import { ThemeProvider } from "./components/ThemeProvider";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
@@ -14,12 +16,14 @@ interface AnalysisResult {
     confidence: number;
     impact: string;
   };
+
   usage: {
     frequency: string;
     impact: string;
     level: string;
     quantity: string;
   };
+
   risks: {
     list: string[];
     details: Array<{
@@ -28,72 +32,42 @@ interface AnalysisResult {
       long_term: string;
     }>;
   };
+
   allergens: {
     list: string[];
     details: Array<{
       name: string;
       symptoms: string;
-      info: string;
+      info?: string;
     }>;
   };
+
   recommendations: {
     overall: string;
     do: string[];
     avoid: string[];
     alternatives: string[];
+    medical_warnings?: string[];
   };
+
   ai_explanation: string;
+
   extracted_text?: string;
 }
 
-const MOCK_RESULT: AnalysisResult = {
-  analysis: {
-    grade: "C",
-    confidence: 0.22,
-    impact: "Moderate",
-  },
-  usage: {
-    frequency: "2-3/week",
-    impact: "Moderate",
-    level: "Limit",
-    quantity: "Small portions",
-  },
-  risks: {
-    list: ["sugar", "sodium"],
-    details: [
-      {
-        name: "sugar",
-        description: "High sugar may cause diabetes and weight gain.",
-        long_term: "Frequent use may be harmful",
-      },
-      {
-        name: "sodium",
-        description: "Excessive sodium can lead to high blood pressure.",
-        long_term: "May increase risk of heart disease",
-      },
-    ],
-  },
-  allergens: {
-    list: [],
-    details: [],
-  },
-  recommendations: {
-    overall: "Consume in moderation.",
-    do: ["Monitor sugar intake", "Check portion sizes"],
-    avoid: ["High sugar intake", "Daily consumption"],
-    alternatives: ["Use natural sweeteners", "Choose low-sodium options"],
-  },
-  ai_explanation:
-    "This product contains moderate levels of sugar and sodium. While occasional consumption is acceptable, regular intake may contribute to health concerns. Consider balancing with healthier alternatives and monitoring your overall daily intake.",
-  extracted_text:
-    "Nutrition Facts - Serving Size: 1 cup (240ml)\nCalories: 150\nTotal Fat: 2g\nSodium: 180mg\nTotal Carbohydrate: 30g\nSugars: 25g\nProtein: 3g",
-};
-
 export default function App() {
   const [isDark, setIsDark] = useState(true);
+
   const [isLoading, setIsLoading] = useState(false);
+
   const [result, setResult] = useState<AnalysisResult | null>(null);
+
   const [showHero, setShowHero] = useState(true);
+
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+    document.body.style.background = "#0a0e1a";
+  }, []);
 
   useEffect(() => {
     if (isDark) {
@@ -109,17 +83,19 @@ export default function App() {
 
   const handleAnalyze = async (file: File, conditions: string) => {
     setIsLoading(true);
+
     setShowHero(false);
 
     try {
       const formData = new FormData();
+
       formData.append("image", file);
+
       formData.append("health_conditions", conditions);
 
-      toast.loading(
-        "Analyzing... This may take a moment if the server is waking up.",
-        { id: "analyzing" },
-      );
+      toast.loading("Analyzing... Please wait ⏳", {
+        id: "analyzing",
+      });
 
       const response = await fetch(
         "https://ml-college-project-1.onrender.com/analyze",
@@ -134,28 +110,33 @@ export default function App() {
 
       if (!response.ok) {
         const errorText = await response.text();
+
         throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json();
+      const data: AnalysisResult = await response.json();
+
       setResult(data);
-      toast.success("Analysis complete!");
+
+      toast.success("Analysis complete 💚");
     } catch (error) {
       toast.dismiss("analyzing");
+
       if (
         error instanceof TypeError &&
         error.message.includes("Failed to fetch")
       ) {
-        toast.error(
-          "Network error: Unable to reach the server. Enable Demo Mode to test the UI.",
-          { duration: 5000 },
-        );
+        toast.error("Server unreachable or CORS issue", {
+          duration: 5000,
+        });
       } else {
         toast.error(
-          `Failed to analyze image: ${error instanceof Error ? error.message : "Unknown error"}`,
+          `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
         );
       }
+
       console.error("Analysis error:", error);
+
       setShowHero(true);
     } finally {
       setIsLoading(false);
@@ -164,47 +145,74 @@ export default function App() {
 
   const handleReset = () => {
     setResult(null);
+
     setShowHero(true);
   };
 
   return (
     <ThemeProvider theme={isDark ? "dark" : "light"}>
       <Toaster />
-      <div
-        className="min-h-screen transition-colors duration-500"
-        style={{ background: "var(--background)", color: "var(--foreground)" }}
-      >
+
+      <div className="min-h-screen bg-[#0a0e1a] text-slate-100 transition-colors duration-300">
         <ParticleBackground />
+
         <Navbar isDark={isDark} toggleTheme={toggleTheme} />
 
         <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             {showHero && !result && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{
+                  opacity: 0,
+                  y: 20,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
                 className="text-center mb-16"
               >
                 <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                  initial={{
+                    opacity: 0,
+                    y: 20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    delay: 0.2,
+                  }}
                   className="text-4xl sm:text-5xl md:text-7xl mb-6 font-bold tracking-tight"
                   style={{
                     background:
                       "linear-gradient(135deg, #ffffff 0%, #10b981 50%, #06b6d4 100%)",
+
                     WebkitBackgroundClip: "text",
+
                     WebkitTextFillColor: "transparent",
+
                     backgroundClip: "text",
+
                     letterSpacing: "-0.02em",
                   }}
                 >
                   Know What's Inside Your Food
                 </motion.h1>
+
                 <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  initial={{
+                    opacity: 0,
+                    y: 20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    delay: 0.3,
+                  }}
                   className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-12 tracking-wide"
                 >
                   Upload a photo of food packaging or ingredients and get
